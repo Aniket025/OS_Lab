@@ -1,0 +1,27 @@
+for producer
+int i;
+	pthread_mutex_lock(&lock);
+	while (1) {
+		while (out == in) {
+			pthread_mutex_unlock(&lock);
+			pthread_kill(scheduler_id, SIGUSR2);
+			pause();
+			pthread_mutex_lock(&lock);
+		}
+		BUFFER[out] = -1;
+		out = (out + 1) % M;
+	}
+
+
+for consumer 
+pthread_mutex_lock(&lock);
+	for (i = 0; i < NUMRNUM; i++) {
+		while ((in + 1) % M == out) {
+			pthread_mutex_unlock(&lock);
+			pthread_kill(scheduler_id, SIGUSR2);
+			pause();
+			pthread_mutex_lock(&lock);
+		}
+		in = (in + 1) % M;
+		BUFFER[in] = rand();
+	}
